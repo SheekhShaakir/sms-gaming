@@ -1,0 +1,64 @@
+// File: server.js
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const smsRoutes = require('./routes/sms');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use('/sms', smsRoutes);
+
+app.get('/', (req, res) => {
+  res.send('Twilio WhatsApp Bot is running');
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+// File: routes/sms.js
+
+const express = require('express');
+const router = express.Router();
+const MessagingResponse = require('twilio').twiml.MessagingResponse;
+
+router.post('/', (req, res) => {
+  const twiml = new MessagingResponse();
+  const msg = req.body.Body.toLowerCase();
+
+  let responseText = '';
+
+  if (msg.includes('hormuud')) {
+    responseText = '✅ Waxaad dooratay Hormuud. Fadlan geli lambarka iyo qadarka.';
+  } else if (msg.includes('somtel')) {
+    responseText = '✅ Waxaad dooratay Somtel. Fadlan geli lambarka iyo qadarka.';
+  } else if (msg.includes('somnet')) {
+    responseText = '✅ Waxaad dooratay Somnet. Fadlan geli lambarka iyo qadarka.';
+  } else {
+    responseText = '❌ Ma fahmin fariintaada. Fadlan dooro mid ka mid ah:\n\n1️⃣ Hormuud\n2️⃣ Somtel\n3️⃣ Somnet\n\n🧾 Haddii aad rabto receipt, ku qor magaca + lacagta + waqtiga.\nTusaale: “Ayaan – $2.50 – 3:45pm”';
+  }
+
+  twiml.message(responseText);
+  res.writeHead(200, { 'Content-Type': 'text/xml' });
+  res.end(twiml.toString());
+});
+
+module.exports = router;
+
+// File: package.json
+{
+  "name": "twilio-whatsapp-bot",
+  "version": "1.0.0",
+  "description": "Simple Twilio WhatsApp autoresponder bot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "twilio": "^4.14.0"
+  }
+}
